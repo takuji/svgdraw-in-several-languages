@@ -1,4 +1,22 @@
+/// <reference path="../../typings/tsd.d.ts" />
+
 class SVGDraw {
+    width: number;
+    height: number;
+    el: string;
+    line_color: string;
+    line_width: number;
+    background_color: string;
+    zoom: number;
+    event_listeners: any;
+    lines: Line[];
+    selection: d3.Selection<any>;
+    svg: Element;
+    status: State;
+    image_url: string;
+    pen: d3.svg.Line<[number, number]>;
+    current_line: d3.Selection<any>;
+
     constructor(params) {
         const {width, height, el} = params
         this.width = width || 640
@@ -15,7 +33,7 @@ class SVGDraw {
 
         this.el = el
         this.selection = d3.select(el)
-        this.svg = d3.select(el)[0][0]
+        this.svg = d3.select(el)[0][0] as Element;
         if (this.svg.nodeName != 'svg') {
             throw Error('el must specify a svg element.')
         }
@@ -124,6 +142,10 @@ class SVGDraw {
 }
 
 class Line {
+    color: string;
+    width: number;
+    points: [number, number][];
+
     constructor(params) {
         const { id } = params
         this.color = '#000000'
@@ -142,6 +164,8 @@ class Line {
 }
 
 class State {
+    context: SVGDraw;
+
     constructor(context) {
         this.context = context
     }
@@ -164,6 +188,9 @@ class WaitingState extends State {
 }
 
 class DrawingState extends State {
+    line_id_counter: number;
+    line: Line;
+
     constructor(context) {
         super(context)
         this.line_id_counter = 0
