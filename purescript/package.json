@@ -1,0 +1,17 @@
+{
+  "name": "svgdraw",
+  "version": "1.0.0",
+  "description": "svg",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Takuji Shimokawa",
+  "license": "MIT",
+  "dependencies": {
+    "d3": "^3.5.17"
+  }
+}
