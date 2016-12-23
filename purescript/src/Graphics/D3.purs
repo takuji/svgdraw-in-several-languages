@@ -4,6 +4,7 @@ import Prelude
 import Control.Monad.Eff (Eff)
 import DOM.Event.Types (Event)
 import DOM.Node.Types (Element)
+import Control.Monad.Except (Except, runExcept)
 
 -- import DOM.Node.Types
 foreign import data D3 :: !
@@ -11,6 +12,11 @@ foreign import data D3 :: !
 foreign import data Selection :: *
 
 foreign import select :: String -> Selection
+
+elem :: Selection -> Element
+elem sel = elemImpl sel
+
+foreign import elemImpl :: Selection -> Element
 
 foreign import setAttr :: forall eff. String -> String -> Selection -> Eff (d3 :: D3 | eff) Selection
 

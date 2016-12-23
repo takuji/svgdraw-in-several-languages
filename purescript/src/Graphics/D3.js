@@ -6,6 +6,10 @@ exports.select = function(el) {
     return d3.select(el);
 };
 
+exports.elemImpl = function(selection) {
+    return selection[0][0];
+}
+
 exports.setAttr = function(name) {
     return function(value) {
         return function(selection) {

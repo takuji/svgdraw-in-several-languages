@@ -5,7 +5,7 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import DOM.Event.Types (Event)
 import Graphics.D3 (Selection)
-import Graphics.D3 (D3, select, setAttr, setStyle, on, mouse) as D3
+import Graphics.D3 (D3, select, setAttr, setStyle, on, mouse, elem) as D3
 import DOM.Node.Types (Element)
 import Data.Array (head)
 import Data.Maybe (Maybe (..))
@@ -43,27 +43,23 @@ data State = State
 
 data Line = Line
 
-create :: forall eff. SVGDrawParams -> Eff (console :: CONSOLE, d3 :: D3.D3 | eff) (Either String Draw)
+create :: forall eff. SVGDrawParams -> Eff (console :: CONSOLE, d3 :: D3.D3 | eff) Draw
 create params = do
-  let svg = (head D3.select(params.el)) >>= head
-  case svg of
-    Just v -> do
-      let d = { width: params.width
-              , height: params.height
-              , el: params.el
-              , line_color: "#000000"
-              , line_width: 1
-              , background_color: "#ffffff"
-              , zoom: 1.0
-              , event_listeners: []
-              , lines: []
-              , svg: (head D3.select(params.el)) >>= head
-              , status: State
-              }
-      initCanvas d
-      pure d
-    Nothing ->
-      Left "svg not found"
+  let svg = D3.elem $ D3.select params.el
+  let d = { width: params.width
+          , height: params.height
+          , el: params.el
+          , line_color: "#000000"
+          , line_width: 1
+          , background_color: "#ffffff"
+          , zoom: 1.0
+          , event_listeners: []
+          , lines: []
+          , svg: svg
+          , status: State
+          }
+  initCanvas d
+  pure d
 
 initCanvas :: forall eff. Draw -> Eff (d3 :: D3.D3 | eff) Selection
 initCanvas d = do
