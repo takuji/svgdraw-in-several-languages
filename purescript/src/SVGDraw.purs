@@ -104,8 +104,31 @@ onMouseUp draw evt = do
   case d.state of
     WaitingState -> pure unit
     DrawingState line -> do
-      closeLine line
-      modifyRef draw \d2 -> d2 { state = WaitingState }
+      updateLine line
+      modifyRef draw \v -> v { state = WaitingState }
+
+onMouseMove :: forall eff. Ref Draw -> Event -> Eff (ref :: REF, d3 :: D3.D3 | eff) Unit
+onMouseMove draw evt = do
+  d <- readRef draw
+  case d.state of
+    WaitingState -> pure unit
+    DrawingState line -> do
+      let pos = getMousePosition d
+      let line' = line {points = snoc line.points pos}
+      updateLine line'
+      modifyRef draw \v -> v { state = DrawingState line' }
+
+onMouseLeave :: forall eff. Ref Draw -> Event -> Eff (ref :: REF, d3 :: D3.D3 | eff) Unit
+onMouseLeave draw evt = do
+  d <- readRef draw
+  case d.state of
+    WaitingState -> pure unit
+    DrawingState line -> do
+      updateLine line
+      modifyRef draw \v -> v { state = WaitingState }
+
+setLineColor :: Color -> Draw -> Unit
+setLineColor color draw = unit
 
 addLine :: forall eff r. { line_color :: String, line_width :: Int, selection :: Selection | r } ->
                          Eff (ref :: REF, d3 :: D3.D3 | eff) Line
@@ -119,19 +142,10 @@ addLine draw = do
   s4 <- D3.setAttr "stroke" draw.line_color s3
   pure { points: points, color: draw.line_color, width: 1, pen: pen, drawing: d3line }
 
-closeLine :: forall eff. Line -> Eff (d3 :: D3.D3 | eff) Selection
-closeLine line = do
+updateLine :: forall eff. Line -> Eff (d3 :: D3.D3 | eff) Selection
+updateLine line = do
   let _data = D3.SVG.Line.setData line.points line.pen
   D3.setAttr "d" _data line.drawing
-
-onMouseMove :: forall eff. Ref Draw -> Event -> Eff (ref :: REF | eff) Unit
-onMouseMove draw evt = pure unit
-
-onMouseLeave :: forall eff. Ref Draw -> Event -> Eff (ref :: REF | eff) Unit
-onMouseLeave draw evt = pure unit
-
-setLineColor :: Color -> Draw -> Unit
-setLineColor color draw = unit
 
 
 -- State
