@@ -74,16 +74,18 @@ initCanvas :: forall eff. Draw -> Eff (d3 :: D3.D3, ref :: REF | eff) Selection
 initCanvas d = do
   let s = D3.select d.el
   draw <- newRef d
-  a <- D3.setAttr "width" ((show d.width) <> "px") s
-  b <- D3.setAttr "height" ((show d.height) <> "px") a
-  c <- D3.setStyle "display" "inline-block" b
-  s4 <- D3.setStyle "background-color" d.background_color c
-  f <- D3.on "mousedown" (\e -> onMouseDown draw e) s4
-  g <- D3.on "mousemove" (\e -> onMouseMove draw e) f
-  h <- D3.on "mouseup" (\e -> onMouseUp draw e) g
-  i <- D3.on "mouseleave" (\e -> onMouseLeave draw e) h
+  pure s 
+    >>= D3.setAttr "width" ((show d.width) <> "px")
+    >>= D3.setAttr "width" ((show d.width) <> "px")
+    >>= D3.setAttr "height" ((show d.height) <> "px")
+    >>= D3.setStyle "display" "inline-block"
+    >>= D3.setStyle "background-color" d.background_color
+    >>= D3.on "mousedown" (\e -> onMouseDown draw e)
+    >>= D3.on "mousemove" (\e -> onMouseMove draw e)
+    >>= D3.on "mouseup" (\e -> onMouseUp draw e)
+    >>= D3.on "mouseleave" (\e -> onMouseLeave draw e)
   -- d3.attr "width" (show d.width) <> "px"
-  pure i
+  -- pure i
 
 getMousePosition :: forall r. {svg :: Element | r} -> Point
 getMousePosition draw = D3.mouse(draw.svg)
@@ -140,12 +142,13 @@ addLine draw = do
   line <- D3.SVG.newLine
   let pen = D3.SVG.Line.interpolate "cardinal" line
   let points = []
-  d3line <- D3.append "path" draw.selection
-  s1 <- D3.setAttr "data-line-id" "1" d3line
-  s2 <- D3.setAttr "d" (D3.SVG.Line.setData points pen) s1
-  s3 <- D3.setAttr "fill" "transparent" s2
-  s4 <- D3.setAttr "stroke" draw.line_color s3
-  pure { points: points, color: draw.line_color, width: 1, pen: pen, drawing: d3line }
+  selLine <- D3.append "path" draw.selection
+  pure selLine
+    >>= D3.setAttr "data-line-id" "1"
+    >>= D3.setAttr "d" (D3.SVG.Line.setData points pen)
+    >>= D3.setAttr "fill" "transparent"
+    >>= D3.setAttr "stroke" draw.line_color
+  pure { points: points, color: draw.line_color, width: 1, pen: pen, drawing: selLine }
 
 updateLine :: forall eff. Line -> Eff (d3 :: D3.D3 | eff) Selection
 updateLine line = do
