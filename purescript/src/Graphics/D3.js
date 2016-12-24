@@ -43,3 +43,9 @@ exports.on = function(name) {
 exports.mouse = function(el) {
     return ds.mouse(el);
 }
+
+exports.append = function(tag) {
+    return function(selection) {
+        return selection.append(tag);
+    };
+};
