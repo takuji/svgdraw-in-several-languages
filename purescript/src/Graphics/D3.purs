@@ -2,6 +2,7 @@ module Graphics.D3 where
 
 import Prelude
 import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Ref (REF)
 import DOM.Event.Types (Event)
 import DOM.Node.Types (Element)
 import Control.Monad.Except (Except, runExcept)
@@ -22,6 +23,9 @@ foreign import setAttr :: forall eff. String -> String -> Selection -> Eff (d3 :
 
 foreign import setStyle :: forall eff. String -> String -> Selection -> Eff (d3 :: D3 | eff) Selection
 
-foreign import on :: forall eff. String -> (Event -> Unit) -> Selection -> Eff (d3 :: D3 | eff) Selection
+foreign import on :: forall eff eff2. String ->
+                                      (Event -> Eff (ref :: REF | eff2) Unit) ->
+                                      Selection ->
+                                      Eff (d3 :: D3, ref :: REF | eff) Selection
 
 foreign import mouse :: Element -> Array Number
