@@ -76,7 +76,6 @@ initCanvas d = do
   draw <- newRef d
   pure s 
     >>= D3.setAttr "width" ((show d.width) <> "px")
-    >>= D3.setAttr "width" ((show d.width) <> "px")
     >>= D3.setAttr "height" ((show d.height) <> "px")
     >>= D3.setStyle "display" "inline-block"
     >>= D3.setStyle "background-color" d.background_color
