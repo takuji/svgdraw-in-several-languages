@@ -78,7 +78,7 @@ initCanvas d = do
   b <- D3.setAttr "height" ((show d.height) <> "px") a
   c <- D3.setStyle "display" "inline-block" b
   s4 <- D3.setStyle "background-color" d.background_color c
-  f <- D3.on "mousedown" (\evt -> onMouseDown draw evt) s4
+  f <- D3.on "mousedown" (\e -> onMouseDown draw e) s4
   g <- D3.on "mousemove" (\e -> onMouseMove draw e) f
   h <- D3.on "mouseup" (\e -> onMouseUp draw e) g
   i <- D3.on "mouseleave" (\e -> onMouseLeave draw e) h
@@ -88,18 +88,19 @@ initCanvas d = do
 getMousePosition :: forall r. {svg :: Element | r} -> Point
 getMousePosition draw = D3.mouse(draw.svg)
 
-onMouseDown :: forall eff. Ref Draw -> Event -> Eff (ref :: REF, d3 :: D3.D3 | eff) Unit
-onMouseDown draw evt = do
+onMouseDown :: Ref Draw -> Event -> Unit
+onMouseDown draw evt = runEff do
   d <- readRef draw
   case d.state of
     WaitingState -> do
       line <- addLine d
-      modifyRef draw \d1 -> d1 { state = DrawingState line
+      let p = getMousePosition d
+      modifyRef draw \d1 -> d1 { state = DrawingState (addPoint p line)
                                , lines = snoc d1.lines line }
     DrawingState _ -> pure unit
 
-onMouseUp :: forall eff. Ref Draw -> Event -> Eff (ref :: REF, d3 :: D3.D3 | eff) Unit
-onMouseUp draw evt = do
+onMouseUp :: Ref Draw -> Event -> Unit
+onMouseUp draw evt = runEff do
   d <- readRef draw
   case d.state of
     WaitingState -> pure unit
@@ -107,8 +108,8 @@ onMouseUp draw evt = do
       updateLine line
       modifyRef draw \v -> v { state = WaitingState }
 
-onMouseMove :: forall eff. Ref Draw -> Event -> Eff (ref :: REF, d3 :: D3.D3 | eff) Unit
-onMouseMove draw evt = do
+onMouseMove :: Ref Draw -> Event -> Unit
+onMouseMove draw evt = runEff do
   d <- readRef draw
   case d.state of
     WaitingState -> pure unit
@@ -118,8 +119,8 @@ onMouseMove draw evt = do
       updateLine line'
       modifyRef draw \v -> v { state = DrawingState line' }
 
-onMouseLeave :: forall eff. Ref Draw -> Event -> Eff (ref :: REF, d3 :: D3.D3 | eff) Unit
-onMouseLeave draw evt = do
+onMouseLeave :: Ref Draw -> Event -> Unit
+onMouseLeave draw evt = runEff do
   d <- readRef draw
   case d.state of
     WaitingState -> pure unit
@@ -130,10 +131,14 @@ onMouseLeave draw evt = do
 setLineColor :: Color -> Draw -> Unit
 setLineColor color draw = unit
 
+addPoint :: Point -> Line -> Line
+addPoint point line = line {points = snoc line.points point}
+
 addLine :: forall eff r. { line_color :: String, line_width :: Int, selection :: Selection | r } ->
                          Eff (ref :: REF, d3 :: D3.D3 | eff) Line
 addLine draw = do
-  let pen = D3.SVG.Line.interpolate "cardinal" D3.SVG.newLine
+  line <- D3.SVG.newLine
+  let pen = D3.SVG.Line.interpolate "cardinal" line
   let points = []
   d3line <- D3.append "path" draw.selection
   s1 <- D3.setAttr "data-line-id" "1" d3line
@@ -147,16 +152,4 @@ updateLine line = do
   let _data = D3.SVG.Line.setData line.points line.pen
   D3.setAttr "d" _data line.drawing
 
-
--- State
-
--- class State where
---   mouseDownHandler :: State -> Event -> Unit
---   mouseUpHandler :: State -> Event -> Unit
---   mouseMoveHandler :: State -> Event -> Unit
---   mouseLeaveHandler :: State -> Event -> Unit
-
--- data WaitingState = WaitingState Draw
--- data DrawingState = DrawingState Draw
-
--- instance waitingState :: 
+foreign import runEff :: forall a eff. Eff (eff) a -> Unit

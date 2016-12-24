@@ -41,11 +41,13 @@ exports.on = function(name) {
 };
 
 exports.mouse = function(el) {
-    return ds.mouse(el);
+    return d3.mouse(el);
 }
 
 exports.append = function(tag) {
     return function(selection) {
-        return selection.append(tag);
+        return function() {
+            return selection.append(tag);
+        };
     };
 };
