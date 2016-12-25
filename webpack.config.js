@@ -1,6 +1,6 @@
 module.exports = {
     entry: {
-        es2015: './es2015/index.js',
+        es2015: './src/es2015/index.js',
         ts: './src/typescript/index.ts'
     },
     output: {
