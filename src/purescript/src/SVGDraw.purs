@@ -147,7 +147,7 @@ addLine draw = do
     >>= D3.setAttr "d" (D3.SVG.Line.setData points pen)
     >>= D3.setAttr "fill" "transparent"
     >>= D3.setAttr "stroke" draw.line_color
-  pure { points: points, color: draw.line_color, width: 1, pen: pen, drawing: selLine }
+  pure { points: points, color: draw.line_color, width: line_width, pen: pen, drawing: selLine }
 
 updateLine :: forall eff. Line -> Eff (d3 :: D3.D3 | eff) Selection
 updateLine line = do
