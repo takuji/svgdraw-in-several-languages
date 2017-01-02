@@ -10,4 +10,5 @@
    :verbose true})
 
 (repl/repl (browser/repl-env)
+  :watch "src"
   :output-dir "out")
